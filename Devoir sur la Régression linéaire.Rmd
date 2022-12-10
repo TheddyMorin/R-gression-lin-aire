@@ -1,0 +1,106 @@
+---
+title: "Régression linéaire sur le marché du Crédit"
+author: "Theddy Morin"
+date: "2022-11-09"
+output: word_document
+---
+
+
+
+# Modèle de régression linéaire sur le marché du Crédit
+Dans ce document, on va procéder à la régression du nombre de jours de retard (qui est la variable expliquée) sur les variables Crédit et Type qui sont les variables explicatives
+
+
+
+## Importation des données
+Les données suivantes vont servir à procéder à la régression linéaire
+
+```{r data}
+dataR = read.csv("CreditBancaire.csv")
+attach(dataR)
+```
+
+
+
+## Régressons le nombre de jours de retard sur les variables Credit et Type
+Le modèle de régression linéaire se présente ainsi:
+
+```{r modèle}
+dataR$Type = as.factor(dataR$Type)
+rlm = lm(Jours ~ Credit + Type, data = dataR)
+rlm
+```
+
+
+
+## Résultats détaillés de la régression
+Voici en détails les résultats détaillés de la régression du nombre de jours de retard sur le montant et le type de crédit octroyé
+
+```{r coef}
+summary(rlm)
+```
+
+
+
+## Tableau partiel des coéfficients
+Le tableau suivant affiche les statistiques de student et les probabilités par variable liées à la régression linéaire 
+
+```{r summary}
+summary(rlm)$coefficients[,3]
+
+summary(rlm)$coefficients[,4]
+```
+
+
+
+## Tableau partiel des coéfficients
+Le tableau suivant affiche les coéfficients estimés et les statistiques de student par variable liées à la régression linéaire
+
+```{r estimate}
+summary(rlm)$coefficients[,1]
+summary(rlm)$coefficients[,3]
+```
+
+
+
+## Visualisation graphique de la régression
+Le graphique suivant permet d'apprécier les écarts du nuage de données par rapport à la droite de régression linéaire et ainsi avoir une idée de l'erreur standard
+
+### Visualisons d'abord la corrélation du nombre de jours de retard et le montant de crédit accordé
+```{r graph1}
+plot(dataR$Credit, dataR$Jours, pch = 20, main = 'Régression du Retard sur le crédit accordé', xlab = 'Montant du Crédit', ylab = 'Jours de retard')
+abline(lm(Jours ~ Credit, data = dataR), col = 'red', lwd = 3)
+```
+
+
+### Visualisons maintenant la corrélation entre le nombre de jours de retard et le type de crédit accoré
+
+```{r graph2}
+plot(dataR$Type, dataR$Jours, pch = 20, main = 'Régression du Retard sur le type de crédit', xlab = 'Type de Crédit', ylab = 'Jours de retard')
+```
+
+
+
+## Création d'une fonction de régression
+La fonction suivante permet de régresser une variable y sur une autre notée x, sachant que ces deux variables sont deux colonnes d'un data frame noté data
+
+```{r function}
+fregress <- function(data){   
+  Estimates = summary(lm(y ~ ., data))$coefficients[, 1]
+  Stat_Student = summary(lm(y ~ ., data))$coefficients[, 3]
+  
+  return(data.frame(Estimates,Stat_Student))
+}
+```
+
+
+
+### Test de la fonction
+Testons la fonction qui vient d'être créé avec des nombres aléatoires
+
+```{r test}
+y<-c(23,67,34,90,109,345,4)
+x<-c(53,91,23,45,567,987,3)
+data <- data.frame(y,x)
+fregress(data)
+```
